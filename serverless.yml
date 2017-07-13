@@ -1,0 +1,171 @@
+service: login
+frameworkVersion: "=1.16.1"
+
+provider:
+  name: aws
+  runtime: python2.7
+  region: us-east-1
+
+package:
+  individually: True
+  exclude:
+    - node_modules/**
+    - env/**
+
+functions:
+  authFunc:
+    handler: auth/wrap.handler
+    role: authLambdaExecutionRole
+    package:
+    include:
+      - auth/**
+    environment:
+      table: ${self:custom.dynamoTable}
+
+  loginFunc:
+    handler: login/wrap.handler
+    events:
+      - http:
+          path: login
+          method: post
+          integration: lambda
+          cors: true
+          response:
+            statusCodes:
+              302:
+                pattern: ''
+                headers:
+                  location: integration.response.header.location
+                  rft-gs-authorization: integration.response.header.rft-gs-authorization
+
+    vpc:
+      securityGroupIds:
+        - sg-c6397eb8
+      subnetIds:
+        - subnet-7b02c421
+        - subnet-50e2bf6c
+    role: loginLambdaExecutionRole
+    package:
+      include:
+        - login/**
+    environment:
+      hostname: ${file(login/ldap.yml):${opt:stage}.hostname}
+      protocol: ${file(login/ldap.yml):${opt:stage}.protocol}
+      port: ${file(login/ldap.yml):${opt:stage}.port}
+      binddn: ${file(login/ldap.yml):${opt:stage}.binddn}
+      loginurl: ${file(/login/ldap.yml):${opt:stage}.loginurl}
+      ttl: ${file(/login/ldap.yml):${opt:stage}.loginurl}
+      table: ${self:custom.dynamoTable}
+
+resources:
+  Resources:
+    dynamoDbTable:
+      Type: AWS::DynamoDB::Table
+      DeletionPolicy: Delete
+      Properties:
+        AttributeDefinitions:
+          -
+            AttributeName: jti
+            AttributeType: S
+        KeySchema:
+          -
+            AttributeName: jti
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: ${self:custom.dynamoTable}
+    authLambdaExecutionRole:
+      Type: AWS::IAM::Role
+      Properties:
+        Path: /
+        RoleName: authLambdaExecutionRole
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - lambda.amazonaws.com
+              Action: sts:AssumeRole
+        Policies:
+          - PolicyName: loginLambdaLogPolicy
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - logs:CreateLogGroup
+                    - logs:CreateLogStream
+                    - logs:PutLogEvents
+                  Resource:
+                    - 'Fn::Join':
+                      - ':'
+                      -
+                        - 'arn:aws:logs'
+                        - Ref: 'AWS::Region'
+                        - Ref: 'AWS::AccountId'
+                        - 'log-group:/aws/lambda/*:*:*'
+                - Effect: Allow
+                  Action:
+                    - dynamodb:Query
+                    - dynamodb:Scan
+                    - dynamodb:GetItem
+                  Resource: 'arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.dynamoTable}'
+    loginLambdaExecutionRole:
+      Type: AWS::IAM::Role
+      Properties:
+        Path: /
+        RoleName: loginLambdaExecutionRole
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - lambda.amazonaws.com
+              Action: sts:AssumeRole
+        Policies:
+          - PolicyName: loginLambdaLogPolicy
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - logs:CreateLogGroup
+                    - logs:CreateLogStream
+                    - logs:PutLogEvents
+                  Resource:
+                    - 'Fn::Join':
+                      - ':'
+                      -
+                        - 'arn:aws:logs'
+                        - Ref: 'AWS::Region'
+                        - Ref: 'AWS::AccountId'
+                        - 'log-group:/aws/lambda/*:*:*'
+                - Effect: Allow
+                  Action:
+                    - ec2:CreateNetworkInterface
+                    - ec2:DescribeNetworkInterfaces
+                    - ec2:DetachNetworkInterface
+                    - ec2:DeleteNetworkInterface
+                  Resource: '*'
+                - Effect: Allow
+                  Action:
+                    - dynamodb:Query
+                    - dynamodb:Scan
+                    - dynamodb:GetItem
+                    - dynamodb:PutItem
+                    - dynamodb:UpdateItem
+                    - dynamodb:DeleteItem
+                  Resource: 'arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.dynamoTable}'
+
+custom:
+  pyIndividually:
+    wrap:authFunc: auth/handler.auth
+    wrap:loginFunc: login/handler.login
+    dockerizedPip: True
+  dynamoTable: ldapSessionTable
+
+plugins:
+  - serverless-python-individually
