@@ -15,10 +15,20 @@ package:
 functions:
   authFunc:
     handler: auth/wrap.handler
+    events:
+      - http:
+          path: auth
+          method: get
+          integration: lambda
+          cors: true
+          request:
+            parameters:
+              headers:
+                Cookie: true
     role: authLambdaExecutionRole
     package:
-    include:
-      - auth/**
+      include:
+        - auth/**
     environment:
       table: ${self:custom.dynamoTable}
 
@@ -35,8 +45,8 @@ functions:
               302:
                 pattern: ''
                 headers:
-                  location: integration.response.header.location
-                  rft-gs-authorization: integration.response.header.rft-gs-authorization
+                  location: integration.response.body.location
+                  Set-Cookie: integration.response.body.cookie
 
     vpc:
       securityGroupIds:
@@ -54,7 +64,6 @@ functions:
       port: ${file(login/ldap.yml):${opt:stage}.port}
       binddn: ${file(login/ldap.yml):${opt:stage}.binddn}
       loginurl: ${file(/login/ldap.yml):${opt:stage}.loginurl}
-      ttl: ${file(/login/ldap.yml):${opt:stage}.loginurl}
       table: ${self:custom.dynamoTable}
 
 resources:

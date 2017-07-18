@@ -20,9 +20,9 @@ def login(event, context):
     #
     # add data validation!
     #
-    body = json.loads(event['body'])
-    uid = body['uid']
-    password = body['password']
+
+    uid = event['body']['uid']
+    password = event['body']['password']
 
     try:
         conn.bind_s(binddn.format(uid), password)
@@ -80,13 +80,11 @@ def login(event, context):
             "message" : "Error writing to Dynamo"
         }
 
+    cookie_token = "rft-gs-authorization={}; domain=rft.geointservices.io; expires={};".format(token.serialize(),time.strftime('%a, %d %b %y %H:%M:%S', time.gmtime(end)))
+
     return {
-        {
-            "statusCode": 302,
-            "headers": { "location": "https://6mnsa3wiff.execute-api.us-east-1.amazonaws.com/test",
-                         "rft-gs-authorization" : "Bearer " + token.serialize() },
-            "body": "You are logged in!"
-        }
+        "location" : "https://6mnsa3wiff.execute-api.us-east-1.amazonaws.com/test",
+        "cookie": cookie_token
     }
 
 
