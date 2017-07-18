@@ -46,7 +46,9 @@ functions:
                 pattern: ''
                 headers:
                   location: integration.response.body.location
-                  Set-Cookie: integration.response.body.cookie
+                  set-Cookie: integration.response.body.cookie1
+                  set-cookie: integration.response.body.cookie2
+                  Set-Cookie: integration.response.body.cookie3
 
     vpc:
       securityGroupIds:

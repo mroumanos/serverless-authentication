@@ -84,7 +84,9 @@ def login(event, context):
 
     return {
         "location" : "https://6mnsa3wiff.execute-api.us-east-1.amazonaws.com/test",
-        "cookie": cookie_token
+        "cookie1": cookie_token,
+        "cookie2": "something",
+        "cookie3": "something else"
     }
 
 
