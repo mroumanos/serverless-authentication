@@ -29,8 +29,8 @@ functions:
     package:
       include:
         - auth/**
-    environment:
-      table: ${self:custom.dynamoTable}
+#    environment:
+#      table: ${self:custom.dynamoTable}
 
   loginFunc:
     handler: login/wrap.handler
@@ -46,9 +46,7 @@ functions:
                 pattern: ''
                 headers:
                   location: integration.response.body.location
-                  set-Cookie: integration.response.body.cookie1
-                  set-cookie: integration.response.body.cookie2
-                  Set-Cookie: integration.response.body.cookie3
+                  Set-Cookie: integration.response.body.cookie
 
     vpc:
       securityGroupIds:
@@ -66,26 +64,26 @@ functions:
       port: ${file(login/ldap.yml):${opt:stage}.port}
       binddn: ${file(login/ldap.yml):${opt:stage}.binddn}
       loginurl: ${file(/login/ldap.yml):${opt:stage}.loginurl}
-      table: ${self:custom.dynamoTable}
+#      table: ${self:custom.dynamoTable}
 
 resources:
   Resources:
-    dynamoDbTable:
-      Type: AWS::DynamoDB::Table
-      DeletionPolicy: Delete
-      Properties:
-        AttributeDefinitions:
-          -
-            AttributeName: jti
-            AttributeType: S
-        KeySchema:
-          -
-            AttributeName: jti
-            KeyType: HASH
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
-        TableName: ${self:custom.dynamoTable}
+#    dynamoDbTable:
+#      Type: AWS::DynamoDB::Table
+#      DeletionPolicy: Delete
+#      Properties:
+#        AttributeDefinitions:
+#          -
+#            AttributeName: jti
+#            AttributeType: S
+#        KeySchema:
+#          -
+#            AttributeName: jti
+#            KeyType: HASH
+#        ProvisionedThroughput:
+#          ReadCapacityUnits: 1
+#          WriteCapacityUnits: 1
+#        TableName: ${self:custom.dynamoTable}
     authLambdaExecutionRole:
       Type: AWS::IAM::Role
       Properties:
@@ -117,12 +115,12 @@ resources:
                         - Ref: 'AWS::Region'
                         - Ref: 'AWS::AccountId'
                         - 'log-group:/aws/lambda/*:*:*'
-                - Effect: Allow
-                  Action:
-                    - dynamodb:Query
-                    - dynamodb:Scan
-                    - dynamodb:GetItem
-                  Resource: 'arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.dynamoTable}'
+#                - Effect: Allow
+#                  Action:
+#                    - dynamodb:Query
+#                    - dynamodb:Scan
+#                    - dynamodb:GetItem
+#                  Resource: 'arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.dynamoTable}'
     loginLambdaExecutionRole:
       Type: AWS::IAM::Role
       Properties:
@@ -161,22 +159,22 @@ resources:
                     - ec2:DetachNetworkInterface
                     - ec2:DeleteNetworkInterface
                   Resource: '*'
-                - Effect: Allow
-                  Action:
-                    - dynamodb:Query
-                    - dynamodb:Scan
-                    - dynamodb:GetItem
-                    - dynamodb:PutItem
-                    - dynamodb:UpdateItem
-                    - dynamodb:DeleteItem
-                  Resource: 'arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.dynamoTable}'
+#                - Effect: Allow
+#                  Action:
+#                    - dynamodb:Query
+#                    - dynamodb:Scan
+#                    - dynamodb:GetItem
+#                    - dynamodb:PutItem
+#                    - dynamodb:UpdateItem
+#                    - dynamodb:DeleteItem
+#                  Resource: 'arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.dynamoTable}'
 
 custom:
   pyIndividually:
     wrap:authFunc: auth/handler.auth
     wrap:loginFunc: login/handler.login
     dockerizedPip: True
-  dynamoTable: ldapSessionTable
+#  dynamoTable: ldapSessionTable
 
 plugins:
   - serverless-python-individually

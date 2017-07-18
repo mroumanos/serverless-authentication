@@ -1,13 +1,15 @@
 import os
 import ldap
 import json
-import uuid, hashlib
+import uuid
 import boto3
+from botocore.exceptions import ClientError
 import time
-from jwcrypto import jwk, jwt
+from jwcrypto import jwk, jwt, jws
 
 def login(event, context):
 
+    bodyTemplate = '{0}: {1} ({2})'
     protocol = os.environ['protocol']
     hostname = os.environ['hostname']
     port = os.environ['port']
@@ -24,21 +26,10 @@ def login(event, context):
     uid = event['body']['uid']
     password = event['body']['password']
 
-    try:
-        conn.bind_s(binddn.format(uid), password)
-
-    except:
-        return {
-            "location": os.environ['loginurl'],
-            "message" : "Your login failed !"
-        }
-
-    # you only get here if you were able to bind with correct uid/pw
+    # create claims
     start = time.time()
     end = start + 86400
     jti = str(uuid.uuid1())
-
-    #create claims
     claims = {
         'exp': end,
         'nbf': start,
@@ -50,43 +41,38 @@ def login(event, context):
     }
 
     try:
+        conn.bind_s(binddn.format(uid), password)
+
         with open('login/key.json', 'rb') as file:
             key = jwk.JWK(**json.loads(file.read()))
             token = jwt.JWT(header={"alg": "ES256"}, claims=claims)
             token.make_signed_token(key)
 
+        # dynamodb = boto3.resource('dynamodb')
+        #
+        # table = dynamodb.Table(os.environ['table'])
+        # item = {
+        #     'jti': jti,
+        #     'session': {
+        #         'user': uid,
+        #         'created_at': time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(start)),
+        #         'expires_at': time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(end))
+        #     }
+        # }
+        # table.put_item(Item=item)
+
+        cookie_token = 'rft-gs-authorization={}; domain=rft.geointservices.io; expires={};'.format(token.serialize(),time.strftime('%a, %d %b %y %H:%M:%S',time.gmtime(end)))
+
+    except ldap.LDAPError as e:
+        return { 'location': os.environ['loginurl'], 'body' : bodyTemplate.format('Unauthorized', 'LDAP error', str(e)) }
+
+    except (jwk.InvalidJWKValue, jwk.InvalidJWKOperation, jwk.InvalidJWKUsage, jws.InvalidJWSSignature, jws.InvalidJWSObject, jws.InvalidJWSOperation) as e:
+        return { 'location': os.environ['loginurl'], 'body': bodyTemplate.format('Unauthorized', 'JWT error', str(e)) }
+
+    except ClientError as e:
+        return {'location': os.environ['loginurl'], 'body' : bodyTemplate.format('Unauthorized', 'Dynamo error', str(e)) }
+
     except:
-        return {
-            "location": "https://login.rft.geointservices.io",
-            "message": "Error JWT encryption"
-        }
+        return { 'location': os.environ['loginurl'], 'body': 'Unknown error' }
 
-    dynamodb = boto3.resource('dynamodb')
-
-    try:
-        table = dynamodb.Table(os.environ['table'])
-        item = {
-            'jti': jti,
-            'session': {
-                'user': uid,
-                'created_at': time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(start)),
-                'expires_at': time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(end))
-            }
-        }
-        table.put_item(Item=item)
-    except:
-        return {
-            "location" : "https://login.rft.geointservices.io",
-            "message" : "Error writing to Dynamo"
-        }
-
-    cookie_token = "rft-gs-authorization={}; domain=rft.geointservices.io; expires={};".format(token.serialize(),time.strftime('%a, %d %b %y %H:%M:%S', time.gmtime(end)))
-
-    return {
-        "location" : "https://6mnsa3wiff.execute-api.us-east-1.amazonaws.com/test",
-        "cookie1": cookie_token,
-        "cookie2": "something",
-        "cookie3": "something else"
-    }
-
-
+    return {'location': 'https://home.rft.geointservices.io', 'cookie': cookie_token}
