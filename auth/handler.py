@@ -16,7 +16,7 @@ def auth(event, context):
         # verify that the token
         with open('auth/key.json', 'rb') as file:
             key = jwk.JWK(**json.loads(file.read()))
-            verified = jwt.JWT(key=key, jwt=token)
+            verified = jwt.JWT(key=key, jwt=token.split('=')[1])
 
         # verify session token has been issued to dynamo table (optional)
         # dynamodb = boto3.resource('dynamodb')
