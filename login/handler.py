@@ -75,4 +75,4 @@ def login(event, context):
     except:
         return { 'location': os.environ['loginurl'], 'body': 'Unknown error' }
 
-    return {'location': 'https://home.rft.geointservices.io', 'cookie': cookie_token}
+    return {'location': 'https://home.rft.geointservices.io', 'cookie': cookie_token }
