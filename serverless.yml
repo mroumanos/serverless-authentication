@@ -29,8 +29,6 @@ functions:
     package:
       include:
         - auth/**
-#    environment:
-#      table: ${self:custom.dynamoTable}
 
   loginFunc:
     handler: login/wrap.handler
@@ -63,27 +61,10 @@ functions:
       protocol: ${file(login/ldap.yml):${opt:stage}.protocol}
       port: ${file(login/ldap.yml):${opt:stage}.port}
       binddn: ${file(login/ldap.yml):${opt:stage}.binddn}
-      loginurl: ${file(/login/ldap.yml):${opt:stage}.loginurl}
-#      table: ${self:custom.dynamoTable}
+      loginurl: login.${self:custom.domain}
 
 resources:
   Resources:
-#    dynamoDbTable:
-#      Type: AWS::DynamoDB::Table
-#      DeletionPolicy: Delete
-#      Properties:
-#        AttributeDefinitions:
-#          -
-#            AttributeName: jti
-#            AttributeType: S
-#        KeySchema:
-#          -
-#            AttributeName: jti
-#            KeyType: HASH
-#        ProvisionedThroughput:
-#          ReadCapacityUnits: 1
-#          WriteCapacityUnits: 1
-#        TableName: ${self:custom.dynamoTable}
     authLambdaExecutionRole:
       Type: AWS::IAM::Role
       Properties:
@@ -115,12 +96,6 @@ resources:
                         - Ref: 'AWS::Region'
                         - Ref: 'AWS::AccountId'
                         - 'log-group:/aws/lambda/*:*:*'
-#                - Effect: Allow
-#                  Action:
-#                    - dynamodb:Query
-#                    - dynamodb:Scan
-#                    - dynamodb:GetItem
-#                  Resource: 'arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.dynamoTable}'
     loginLambdaExecutionRole:
       Type: AWS::IAM::Role
       Properties:
@@ -159,22 +134,13 @@ resources:
                     - ec2:DetachNetworkInterface
                     - ec2:DeleteNetworkInterface
                   Resource: '*'
-#                - Effect: Allow
-#                  Action:
-#                    - dynamodb:Query
-#                    - dynamodb:Scan
-#                    - dynamodb:GetItem
-#                    - dynamodb:PutItem
-#                    - dynamodb:UpdateItem
-#                    - dynamodb:DeleteItem
-#                  Resource: 'arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.dynamoTable}'
 
 custom:
   pyIndividually:
     wrap:authFunc: auth/handler.auth
     wrap:loginFunc: login/handler.login
     dockerizedPip: True
-#  dynamoTable: ldapSessionTable
+  domain: rft.geointservices.io
 
 plugins:
   - serverless-python-individually

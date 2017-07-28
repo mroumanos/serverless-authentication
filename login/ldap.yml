@@ -3,4 +3,3 @@ dev:
   protocol: ldaps
   port: 636
   binddn: uid={},cn=users,cn=accounts,dc=geointservices,dc=io
-  loginurl: https://login.rft.geointservices.io
