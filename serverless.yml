@@ -7,7 +7,7 @@ provider:
   region: us-east-1
 
 package:
-  individually: True
+  individually: true
   exclude:
     - node_modules/**
     - env/**
@@ -205,7 +205,7 @@ custom:
     wrap:authFunc: auth/handler.auth
     wrap:authEvalFunc: authEval/handler.auth
     wrap:loginFunc: login/handler.login
-    dockerizedPip: True
+    dockerizedPip: true
   domain: rft.geointservices.io
   policyBucket: rft-website-production
   policyPath: policies
