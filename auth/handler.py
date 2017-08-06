@@ -16,7 +16,7 @@ def auth(event, context):
         # verify that the token
         with open('auth/key.json', 'rb') as file:
             key = jwk.JWK(**json.loads(file.read()))
-            verified = jwt.JWT(key=key, jwt=token.split('=')[1])
+            verified = jwt.JWT(key=key, jwt=token)
 
     except KeyError as e:
         raise Exception(bodyTemplate.format(401, 'Unauthorized: no session cookie found', str(e)))
@@ -28,6 +28,6 @@ def auth(event, context):
         raise Exception(bodyTemplate.format(401, 'Unauthorized: table entry not valid', str(e)))
 
     except:
-        raise Exception(bodyTemplate.format(401, 'Unauthorized: unknown error', 'unknown'))
+        raise Exception(bodyTemplate.format(401, 'Unauthorized: unknown error', 'token=' + str(token) + ' event=' + str(event)))
 
-    raise Exception(bodyTemplate.format(202, 'Authorized: welcome!', str(token.claims)))
+    raise Exception(bodyTemplate.format(202, 'Authorized: welcome!', str(verified.claims)))

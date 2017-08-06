@@ -4,13 +4,12 @@
   "description": "Deployment package for serverless websites with LDAP authentication",
   "main": "",
   "dependencies": {
-    "serverless" : "^1.17.0",
-    "serverless-python-individually": "^0.1.4",
+    "serverless": "^1.17.0",
+    "serverless-python-individually": "^0.1.5",
     "update": "^0.7.4"
   },
   "devDependencies": {},
-  "scripts": {
-  },
+  "scripts": {},
   "author": "Michael Roumanos",
   "license": "Digital Globe, Inc"
 }

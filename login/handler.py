@@ -34,7 +34,7 @@ def login(event, context):
         'exp': end,
         'nbf': start,
         'iat': start,
-        'iss': 'lambda.rft.geointservices.io',
+        'iss': 'auth.rft.geointservices.io',
         'aud': 'rft.geointservices.io',
         'prn': uid,
         'jti': jti

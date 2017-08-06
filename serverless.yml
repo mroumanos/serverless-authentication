@@ -11,6 +11,7 @@ package:
   exclude:
     - node_modules/**
     - env/**
+    - static/**
 
 functions:
   authFunc:
@@ -24,11 +25,32 @@ functions:
           request:
             parameters:
               headers:
-                Cookie: true
+                X-rft-gs-authorization: true
     role: authLambdaExecutionRole
     package:
       include:
         - auth/**
+
+  authEvalFunc:
+    handler: authEval/wrap.handler
+    events:
+      - http:
+          path: authEval
+          method: get
+          integration: lambda
+          cors: true
+          request:
+            parameters:
+              headers:
+                X-rft-gs-authorization: true
+    role: authEvalLambdaExecutionRole
+    package:
+      include:
+        - authEval/**
+    environment:
+      policyBucket: ${self:custom.policyBucket}
+      policyPath: ${self:custom.policyPath}
+      policyFile: authEvalPolicy.json
 
   loginFunc:
     handler: login/wrap.handler
@@ -96,6 +118,49 @@ resources:
                         - Ref: 'AWS::Region'
                         - Ref: 'AWS::AccountId'
                         - 'log-group:/aws/lambda/*:*:*'
+
+    authEvalLambdaExecutionRole:
+      Type: AWS::IAM::Role
+      Properties:
+        Path: /
+        RoleName: authEvalLambdaExecutionRole
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - lambda.amazonaws.com
+              Action: sts:AssumeRole
+        Policies:
+          - PolicyName: loginLambdaLogPolicy
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - logs:CreateLogGroup
+                    - logs:CreateLogStream
+                    - logs:PutLogEvents
+                  Resource:
+                    - 'Fn::Join':
+                      - ':'
+                      -
+                        - 'arn:aws:logs'
+                        - Ref: 'AWS::Region'
+                        - Ref: 'AWS::AccountId'
+                        - 'log-group:/aws/lambda/*:*:*'
+                - Effect: Allow
+                  Action:
+                    - s3:GetObject
+                  Resource:
+                    - 'Fn::Join':
+                      - '/'
+                      -
+                        - 'arn:aws:s3:::${self:custom.policyBucket}'
+                        - ${self:custom.policyPath}
+                        - '*'
+
     loginLambdaExecutionRole:
       Type: AWS::IAM::Role
       Properties:
@@ -138,9 +203,12 @@ resources:
 custom:
   pyIndividually:
     wrap:authFunc: auth/handler.auth
+    wrap:authEvalFunc: authEval/handler.auth
     wrap:loginFunc: login/handler.login
     dockerizedPip: True
   domain: rft.geointservices.io
+  policyBucket: rft-website-production
+  policyPath: policies
 
 plugins:
   - serverless-python-individually

@@ -1,0 +1,82 @@
+{
+    "palacima" : {
+        "name": "Augie Palacima",
+        "group": "RFT"
+    },
+    "copenhag" : {
+        "name": "Andrew Copenhaver",
+        "group": "RFT"
+    },
+    "dealbj1" : {
+        "name": "Brennan Deal",
+        "group": "RFT"
+    },
+    "bogusjm" : {
+        "name": "Jason Bogus",
+        "group": "RFT"
+    },
+    "wallacae" : {
+        "name": "Anne Wallace",
+        "group": "RFT"
+    },
+    "patelhg" : {
+        "name": "Hardik Patel",
+        "group": "RFT"
+    },
+    "picunekc" : {
+        "name": "Kelly Picune",
+        "group": "RFT"
+    },
+    "tangak" : {
+        "name": "Alan Tang",
+        "group": "RFT"
+    },
+    "mcweenrj" : {
+        "name": "Ryan McWeeny",
+        "group": "RFT"
+    },
+    "roumanmj" : {
+        "name": "Michael Roumanos",
+        "group": "RFT"
+    },
+    "fletchaj" : {
+        "name": "Amanda Fletcher",
+        "group": "RFT"
+    },
+    "khatribp" : {
+        "name": "Bhavish Khatri",
+        "group": "RFT"
+    },
+    "christsc" : {
+        "name": "Carter Christopher",
+        "group": "GS"
+    },
+    "robbcm" : {
+        "name": "Corry Robb",
+        "group": "GS"
+    },
+    "ayerssm" : {
+        "name": "Scott Ayers",
+        "group": "GS"
+    },
+    "cacnerdw" : {
+        "name": "David Cacner",
+        "group": "GS"
+    },
+    "longjw" : {
+        "name": "Jim Long",
+        "group": "GS"
+    },
+    "kelleyaj" : {
+        "name": "Aaron Kelley",
+        "group": "GS"
+    },
+    "maharajm" : {
+        "name": "Michelle Maharaj",
+        "group": "GS"
+    },
+    "jonesza1" : {
+        "name": "Zachary Jones",
+        "group": ""
+    }
+}
