@@ -78,5 +78,42 @@
     "jonesza1" : {
         "name": "Zachary Jones",
         "group": ""
+    },
+    "bentlesg": {
+        "name": "Scott Bentley",
+        "group": "RFT"
+    },
+    "fontelen": {
+        "name": "Elliot Fontela",
+        "group": "RFT"
+    },
+    "desjaraj": {
+        "name": "Abi Desjardins",
+        "group": "RFT"
+    },
+    "taysomjm":{
+        "name": "Jim Taysom",
+        "group": "RFT"
+    },
+    "clunieit":{
+        "name": "Ian Clunie",
+        "group": "RFT"
+    },
+    "sylviarn":{
+        "name": "Rich Sylvia",
+        "group": "RFT"
+    },
+    "barosce":{
+        "name": "Clay Baros",
+        "group": "RFT"
+    },
+    "lanthirp":{
+        "name": "Ryan Lanthier",
+        "group": "RFT"
+    },
+    "yagermc": {
+        "name": "Maria Yager",
+        "group": "RFT"
     }
+    
 }

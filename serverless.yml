@@ -55,6 +55,7 @@ functions:
   loginFunc:
     handler: login/wrap.handler
     events:
+      - schedule: cron(0,15,45 6-17 * * * *)
       - http:
           path: login
           method: post

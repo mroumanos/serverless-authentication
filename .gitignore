@@ -24,3 +24,5 @@ var/
 .idea/
 package-lock.json
 node_modules/
+ldap.yml
+.ipynb_checkpoints/
